@@ -3,7 +3,7 @@ import datetime
 import requests
 import json
 from requests.exceptions import ConnectionError
-
+from sys import stderr
 
 class FriskbyClient(object):
     headers = {'Content-Type': 'application/json'}
@@ -37,7 +37,8 @@ class FriskbyClient(object):
 
         respons = requests.post( self.device_config.getPostURL( ) ,
                                  headers=FriskbyClient.headers,
-                                 data=json.dumps(data))
+                                 data=json.dumps(data),
+                                 timeout=30)
         if respons.status_code != 201:
             respons.raise_for_status()
             raise Exception('Server did not respond with 201 Created.  Response: %d %s'
@@ -53,6 +54,8 @@ class FriskbyClient(object):
 
         self.stack.append( (timestamp , value) )
 
+        if len(self.stack) > 500:
+            stderr.write('Warning: big stack file "%s".  Size = %d.\n' % (self.cache_file, len(self.stack)))
         if len(self.stack) > 0:
             try:
                 self._post_stack( )

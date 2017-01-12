@@ -107,7 +107,7 @@ class FbyRunner(object):
             sys.stderr.write('Error submitting log message!')
 
     def run(self):
-        network_block( )
+        # network_block( )
         self._config = DeviceConfig( CONFIG_FILE )
         self._config.logMessage("Starting up")
         self._config.postGitVersion( )
@@ -118,8 +118,8 @@ class FbyRunner(object):
         sampler = Sampler( SDS011(True) , self._sample_time , sleep_time = self._sleep_time, accuracy = self._accuracy )
 
         while True:
-            if self._exception_count >= 5:
-                time.sleep(30)
+            if self._exception_count >= 3:
+                sys.exit('fby_client exits, exception_count = %d' % self._exception_count)
             try:
                 data = self.collect(sampler , self._config)
                 if not data:
