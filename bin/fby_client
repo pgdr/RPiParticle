@@ -28,23 +28,8 @@ else:
 
 
 def get_sys_info():
-    """This gets basic system information to log on startup"""
-    sysname, nodename, release, version, machine = os.uname()
-    python_vs, python_cc = sys.version.split('\n')
-    req_vs = '0.0.0'
-    local_time = dt.now().isoformat()
-    try:
-        req_vs = requests.__version__
-    except:
-        pass
-    return {'sysname': sysname,
-            'nodename': nodename,
-            'release':  release,
-            'version': version,
-            'python': python_vs,
-            'pythoncc': python_cc,
-            'requests': req_vs,
-            'localtime': local_time}
+    from os_release import get_sys_info as gsi
+    return gsi()
 
 class FbyRunner(object):
 
