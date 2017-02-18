@@ -115,7 +115,10 @@ class FbyRunner(object):
         self._config = DeviceConfig( CONFIG_FILE )
         sys_info = 'missing sys_info'
         try:
-            sys_info = str(get_sys_info())
+            import json
+            sys_info = get_sys_info()
+            if sys_info:
+                sys_info = json.dumps(sys_info, indent=4, sort_keys=True)
         except:
             pass
         self._config.logMessage("Starting up", long_msg = sys_info)

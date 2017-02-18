@@ -34,18 +34,23 @@ def get_sys_info():
     except:
         pass
     try:
+        import requests
         req_vs = requests.__version__
     except:
         pass
     if not lsb:
         lsb = {}
-    sysinf =  {'sysname': sysname,
-               'nodename': nodename,
-               'release':  release,
-               'version': version,
-               'python': python_vs,
-               'pythoncc': python_cc,
-               'requests': req_vs,
+    sysinf =  {'sysname'  : sysname,
+               'nodename' : nodename,
+               'release'  :  release,
+               'version'  : version,
+               'python'   : python_vs,
+               'pythoncc' : python_cc,
+               'requests' : req_vs,
                'localtime': local_time}
     sysinf.update(lsb)
     return sysinf
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(get_sys_info(), indent=4, sort_keys=True))
