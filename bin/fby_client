@@ -119,8 +119,8 @@ class FbyRunner(object):
             sys_info = get_sys_info()
             if sys_info:
                 sys_info = json.dumps(sys_info, indent=4, sort_keys=True)
-        except:
-            pass
+        except Exception as e:
+            sys.stderr.write('Error getting sys_info: %s' % e)
         self._config.logMessage("Starting up", long_msg = sys_info)
         self._config.postGitVersion( )
 
