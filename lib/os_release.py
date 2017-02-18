@@ -3,7 +3,7 @@ from os import uname
 from os.path import isfile
 from datetime import datetime as dt
 
-def os_release(pfx='LSB_'):
+def _read_os_release(pfx='LSB_'):
     fname = '/etc/os-release'
     if not isfile(fname):
         return {}
@@ -22,7 +22,7 @@ def os_release(pfx='LSB_'):
                 props[kv[0]] = kv[1]
     return props
 
-def get_sys_info():
+def sys_info():
     """This gets basic system information to log on startup"""
     sysname, nodename, release, version, machine = uname()
     python_vs, python_cc = sys_version.split('\n')
@@ -30,7 +30,7 @@ def get_sys_info():
     local_time = dt.now().isoformat()
     lsb = None
     try:
-        lsb = os_release()
+        lsb = _read_os_release()
     except:
         pass
     try:
@@ -53,4 +53,4 @@ def get_sys_info():
 
 if __name__ == '__main__':
     import json
-    print(json.dumps(get_sys_info(), indent=4, sort_keys=True))
+    print(json.dumps(sys_info(), indent=4, sort_keys=True))
