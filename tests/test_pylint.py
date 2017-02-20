@@ -43,6 +43,8 @@ class PylintTest(TestCase):
                     "lib/sds011.py",
                     "lib/wifi_config.py",
                     "lib/service.py",
+                    "lib/friskby_dao.py",
+                    "lib/friskby_submitter",
                     "lib/os_release.py"]:
                      
             exit_code = subprocess.check_call(["pylint" , "-E", lib])
