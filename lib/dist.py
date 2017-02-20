@@ -12,5 +12,3 @@ files = ["bin/fby_client",
 
 directories = ["var",
                "etc"]
-
-

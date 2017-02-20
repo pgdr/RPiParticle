@@ -47,6 +47,8 @@ class FbyRunner(object):
         self._config = None
         self._sql_path = os.path.join(VAR_PATH, 'friskby.sql')
 
+
+
     @staticmethod
     def install(config):
         git_module = GitModule( url = config.getRepoURL() )
