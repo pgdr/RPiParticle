@@ -1,6 +1,9 @@
+import sys
 import time
 from datetime import datetime as dt
+
 from ts import TS
+from friskby_dao import FriskbyDao
 
 class Sampler(object):
     """This class is initialized with a reader (a sensor of type SDS011), a dao and
@@ -35,3 +38,13 @@ class Sampler(object):
                 break
             time.sleep(self.sleep_time)
         self.dao.persist_ts(data)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        dao = FriskbyDao(sys.argv[1])
+        from sds011 import SDS011
+        sam = Sampler(SDS011(True), dao, 10) # 10 sec
+        sam.collect()
+    else:
+        sys.stderr.write('Please specify database file.\n')

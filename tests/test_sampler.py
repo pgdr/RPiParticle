@@ -25,11 +25,11 @@ class SamplerTest(TestCase):
         sleep_time = 0.10
 
         start = dt.now()
-        sampler = Sampler( SDS011(True) , self.dao, sample_time = sample_time , sleep_time = sleep_time )
-        sampler.collect( )
-        stop = dt.now( )
+        sampler = Sampler(SDS011(True), self.dao, sample_time=sample_time, sleep_time=sleep_time)
+        sampler.collect()
+        stop = dt.now()
 
         delta = stop - start
-        self.assertTrue( (delta.total_seconds() - sample_time) > 0)
+        self.assertTrue((delta.total_seconds() - sample_time) > 0)
         data = self.dao.get_non_uploaded(limit=30)
         self.assertTrue(len(data) > 0)
