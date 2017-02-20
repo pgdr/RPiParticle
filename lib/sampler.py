@@ -1,6 +1,7 @@
 import time
 from datetime import datetime as dt
 from ts import TS
+from friskby_dao import FriskbyDao
 import sqlite3 as sql
 import sys
 
@@ -15,26 +16,7 @@ class Sampler(object):
         self.sample_time = sample_time
         self.sleep_time = sleep_time
         self.accuracy = accuracy
-        self.sql_path = sql_path
-
-
-    def _insert(self, val, sensor):
-        """Returns INSERT query"""
-        return 'INSERT INTO samples (value, sensor, timestamp) VALUES (%f, %s, %s)' % (val, sensor, dt.now())
-
-    def _write_ts_to_sql(self, data):
-        ts_pm10, ts_pm25 = data
-        q10 = self.__insert(ts_pm10.median(), 'PM10')
-        q25 = self.__insert(ts_pm25.median(), 'PM25')
-        try:
-            con = sqlite3.connect(self.sql_path)
-            con.execute(q10)
-            con.execute(q25)
-        except Exception as e:
-            sys.stderr.write('Error on persisting data: %s.\n' % e)
-        finally:
-            con.close()
-
+        self.dao = FriskbyDao(sql_path)
 
     def collect(self):
         """Reads values from the sensor and writes it to its sql database.
@@ -53,7 +35,7 @@ class Sampler(object):
 
             time.sleep( self.sleep_time )
 
-        self._write_ts_to_sql(data)
+        self.dao.persist_ts(data)
 
 if __name__ == '__main__':
     # read sys.argv

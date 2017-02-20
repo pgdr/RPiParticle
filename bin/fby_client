@@ -14,7 +14,7 @@ CONFIG_FILE = os.path.join( ROOT , "etc/config.json")
 VAR_PATH = os.path.join(ROOT , "var")
 
 import dist
-from friskby_client import FriskbyClient
+from fby_submitter import FriskbySubmitter
 from sampler import Sampler
 from device_config import DeviceConfig
 from git_module import GitModule
@@ -109,9 +109,7 @@ class FbyRunner(object):
         self._config.postGitVersion( )
 
         device_id = self._config.getDeviceID( )
-        client_pm10 = FriskbyClient(self._config , "%s_PM10" % device_id, VAR_PATH)
-        client_pm25 = FriskbyClient(self._config , "%s_PM25" % device_id, VAR_PATH)
-        submitter = FriskbySubmitter(self._config, self.sql_path) # this will make the two above obsolete
+        submitter = FriskbySubmitter(self._config, self._sql_path) # this will make the two above obsolete
         sampler = Sampler( SDS011(True) , self._sql_path, self._sample_time , sleep_time = self._sleep_time, accuracy = self._accuracy )
 
         while True:

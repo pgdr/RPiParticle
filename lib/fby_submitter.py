@@ -37,32 +37,6 @@ class FriskbySubmitter(object):
         return True # no exception, everything written
 
 
-    def _all_non_uploaded(self):
-        q = 'SELECT * FROM samples WHERE NOT uploaded LIMIT=100' # extract 100 to config?
-        try:
-            conn = sqlite3.connect(self.sql_path)
-            result = conn.execute(q)
-            return result
-        except Exception as e:
-            sys.stderr.write('Error on reading data: %s.\n' % e)
-        finally:
-            conn.close()
-
-    def _mark_uploaded(self, data):
-        q = 'UPDATE samples SET uploaded=1 WHERE id=%s' # extract 100 to config?
-        try:
-            conn = sqlite3.connect(self.sql_path)
-            conn.execute('begin')
-            for d in data:
-                # id, value, sensor, timestamp, uploaded
-                id_,_,_,_,_ = d
-                conn.execute(q%id_)
-            conn.execute('commit')
-        except Exception as e:
-            sys.stderr.write('Error on setting UPLOADED data! %s.\n' % e)
-        finally:
-            conn.close()
-
     def post(self):
         timestamp = dt.utcnow().isoformat() + "+00:00" # manual TZ
         to_upload = self._all_non_uploaded()
