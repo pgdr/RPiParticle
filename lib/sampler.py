@@ -6,7 +6,7 @@ import sys
 
 class Sampler(object):
 
-    def __init__(self, reader, sample_time , sql_path, sleep_time = 0.10, accuracy = None):
+    def __init__(self, reader, sql_path, sample_time, sleep_time = 0.10, accuracy = None):
         """
         The sqlite db has a table called 'samples' with schema
         id, value, sensor, timestamp, uploaded
@@ -31,7 +31,7 @@ class Sampler(object):
             con.execute(q10)
             con.execute(q25)
         except Exception as e:
-            sys.stderr.write('Error on persisting data: %s.' % e)
+            sys.stderr.write('Error on persisting data: %s.\n' % e)
         finally:
             con.close()
 
@@ -54,3 +54,8 @@ class Sampler(object):
             time.sleep( self.sleep_time )
 
         self._write_ts_to_sql(data)
+
+if __name__ == '__main__':
+    # read sys.argv
+    s = Sampler(reader, sql_path, sample_time, sleep_time = 0.10, accuracy = None)
+    s.collect()

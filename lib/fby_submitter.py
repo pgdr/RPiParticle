@@ -70,3 +70,8 @@ class FriskbySubmitter(object):
             return
         if self._upload(data):
             self._mark_uploaded(to_upload)
+
+if __name__ == '__main__':
+    # read sys.argv
+    submitter = FriskbySubmitter( device_config , sql_path) # todo read device config
+    submitter.post()
