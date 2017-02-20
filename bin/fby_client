@@ -1,20 +1,24 @@
 #!/usr/bin/env python
-import sys
-import os
-from serial import SerialException
-from datetime import datetime as dt
-import time
-import requests
-from traceback import format_exception
 import json
+import os
+import sys
+import time
 
-ROOT = os.path.abspath( os.path.join( os.path.dirname( __file__ ) , "../" ))
-sys.path.insert(0 , os.path.join(ROOT , "lib"))
-CONFIG_FILE = os.path.join( ROOT , "etc/config.json")
-VAR_PATH = os.path.join(ROOT , "var")
+from datetime import datetime as dt
+from traceback import format_exception
+
+import requests
+
+from serial import SerialException
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+sys.path.insert(0, os.path.join(ROOT, "lib"))
+CONFIG_FILE = os.path.join(ROOT, "etc/config.json")
+VAR_PATH = os.path.join(ROOT, "var")
 
 import dist
 from fby_submitter import FriskbySubmitter
+from friskby_dao import FriskbyDao
 from sampler import Sampler
 from device_config import DeviceConfig
 from git_module import GitModule
@@ -39,21 +43,25 @@ def get_sys_info():
 
 class FbyRunner(object):
 
-    def __init__(self, argv):
+    def __init__(self, var_path = None):
         self._sample_time = 10 * 60
-        self._sleep_time  = 0.50
+        self._sleep_time = 0.50
         self._exception_count = 0 #  #exceptions since last success
         self._accuracy = 4 # round observation to fourth digit
         self._config = None
+        if var_path:
+            VAR_PATH = var_path
         self._sql_path = os.path.join(VAR_PATH, 'friskby.sql')
+        self._dao = FriskbyDao(self._sql_path)
+
 
     @staticmethod
     def install(config):
-        git_module = GitModule( url = config.getRepoURL() )
-        git_module.checkout( config.getGitRef( ) )
-        git_module.runTests( "tests/run_tests" )
-        git_module.install( ROOT , files = dist.files , directories = dist.directories )
-        config.save( filename = CONFIG_FILE )
+        git_module = GitModule(url=config.getRepoURL())
+        git_module.checkout(config.getGitRef())
+        git_module.runTests("tests/run_tests")
+        git_module.install(ROOT, files=dist.files, directories=dist.directories)
+        config.save(filename=CONFIG_FILE)
 
 
     @classmethod
@@ -64,22 +72,22 @@ class FbyRunner(object):
     @classmethod
     def restart(cls, config):
         cls.install(config)
-        os.execl( __file__ , __file__)
+        os.execl(__file__, __file__)
 
         raise Exception("Fatal error: os.execl() returned - trying to rollback")
 
     @classmethod
     def updateClient(cls, config):
-        new_config = config.downloadNew( )
-        if config.updateRequired( new_config ):
+        new_config = config.downloadNew()
+        if config.updateRequired(new_config):
             try:
                 config.logMessage("Restarting client - new version:%s" % new_config.getGitRef())
-                cls.restart( new_config )
-            except Exception as exc:
+                cls.restart(new_config)
+            except:
                 exc_type, exc_value, exc_tb = sys.exc_info()
-                tb_list = format_exception( exc_type , exc_value , exc_tb)
-                config.logMessage("Restart failed - trying rollback" , long_msg = "".join( tb_list ))
-                cls.rollback( config )
+                tb_list = format_exception(exc_type, exc_value, exc_tb)
+                config.logMessage("Restart failed - trying rollback", long_msg="".join(tb_list))
+                cls.rollback(config)
                 config.logMessage("Rollback complete")
 
 
@@ -93,34 +101,35 @@ class FbyRunner(object):
         except Exception:
             pass
         exc_type, exc_value, exc_tb = exc_info
-        tb_list = format_exception( exc_type , exc_value , exc_tb)
+        tb_list = format_exception(exc_type, exc_value, exc_tb)
         log_payload = 'Exception caught: "%s".' % (err_msg)
-        traceback = "".join( tb_list )
+        traceback = "".join(tb_list)
         try:
-            self._config.logMessage(log_payload, long_msg = traceback)
-        except Exception as err:
+            self._config.logMessage(log_payload, long_msg=traceback)
+        except:
             sys.stderr.write('Error submitting log message!')
 
     def run(self):
-        network_block( )
-        self._config = DeviceConfig( CONFIG_FILE )
+        network_block()
+        self._config = DeviceConfig(CONFIG_FILE)
         long_msg = get_sys_info()
-        self._config.logMessage("Starting up", long_msg = long_msg)
-        self._config.postGitVersion( )
+        self._config.logMessage("Starting up", long_msg=long_msg)
+        self._config.postGitVersion()
 
-        device_id = self._config.getDeviceID( )
-        submitter = FriskbySubmitter(self._config, self._sql_path) # this will make the two above obsolete
-        sampler = Sampler( SDS011(True) , self._sql_path, self._sample_time , sleep_time = self._sleep_time, accuracy = self._accuracy )
+        submitter = FriskbySubmitter(self._config, self._dao)
+        sampler = Sampler(SDS011(True), self._dao,
+                          self._sample_time, sleep_time=self._sleep_time,
+                          accuracy=self._accuracy)
 
         while True:
             if self._exception_count >= 5:
                 time.sleep(30)
             try:
-                sampler.collect( )
-                submitter.post( )
-                self.updateClient( self._config )
-            except Exception as a:
-                self._handle_post_exception(a, sys.exc_info())
+                sampler.collect()
+                submitter.post()
+                self.updateClient(self._config)
+            except Exception as err:
+                self._handle_post_exception(err, sys.exc_info())
             else:
                 # try/except/else: if nothing has been raised we successfully posted
                 self._exception_count = 0
@@ -135,13 +144,13 @@ def network_block():
             sys.exit("No network contact established - giving up")
 
         try:
-            response = requests.get( url )
+            response = requests.get(url)
             if response.status_code == 200:
                 break
         except Exception:
-            time.sleep( 2 )
+            time.sleep(2)
 
 
 if __name__ == "__main__":
-    fby = FbyRunner( sys.argv )
+    fby = FbyRunner()
     fby.run()
