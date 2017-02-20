@@ -1,6 +1,7 @@
-import os.path
+import os
 from unittest import TestCase
 import imp
+from random import randint
 
 client_file = os.path.abspath( os.path.join( os.path.dirname(__file__) , "../bin/fby_client"))
 main_module = imp.load_source("fby_client" , client_file)
@@ -9,7 +10,9 @@ main_module = imp.load_source("fby_client" , client_file)
 class FbyRunnerTest(TestCase):
 
     def test_load(self):
-        fby_client = main_module.FbyRunner( ["arg1","arg2"] )
+        tmp_f = '/tmp/%d' % randint(2**30, 2**32)
+        os.mkdir(tmp_f)
+        fby_client = main_module.FbyRunner(var_path=tmp_f)
 
     def test_sysinfo(self):
         sys_info = main_module.get_sys_info()

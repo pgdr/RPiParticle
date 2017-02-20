@@ -45,7 +45,8 @@ class PylintTest(TestCase):
                     "lib/service.py",
                     "lib/friskby_dao.py",
                     "lib/fby_submitter",
-                    "lib/os_release.py"]:
+                    "lib/os_release.py",
+                    "bin/fby_client"]:
 
             exit_code = subprocess.check_call(["pylint" , "-E", lib])
             self.assertEqual( exit_code , 0 )

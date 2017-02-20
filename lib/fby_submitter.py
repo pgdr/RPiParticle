@@ -1,19 +1,15 @@
 import json
 import requests
 
-from friskby_dao import FriskbyDao
-
-
-
 class FriskbySubmitter(object):
     """This class submits data from a database to the friskby cloud, then proceeds
     to mark the uploaded data as such.  The constructor takes a device_config
     (to read https keys and urls) and a path to an sqlite file.
     """
 
-    def __init__(self, device_config, sql_path):
+    def __init__(self, device_config, dao):
         self.device_config = device_config
-        self.dao = FriskbyDao(sql_path)
+        self.dao = dao
 
     def _upload(self, rows):
         # id, value, sensor, timestamp, uploaded

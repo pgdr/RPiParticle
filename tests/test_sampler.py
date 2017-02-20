@@ -25,7 +25,7 @@ class SamplerTest(TestCase):
         sleep_time = 0.10
 
         start = dt.now()
-        sampler = Sampler( SDS011(True) , self.fname, sample_time = sample_time , sleep_time = sleep_time )
+        sampler = Sampler( SDS011(True) , self.dao, sample_time = sample_time , sleep_time = sleep_time )
         sampler.collect( )
         stop = dt.now( )
 

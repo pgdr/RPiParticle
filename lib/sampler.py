@@ -1,29 +1,26 @@
 import time
 from datetime import datetime as dt
 from ts import TS
-from friskby_dao import FriskbyDao
 
 class Sampler(object):
-    """This class is initialized with a reader (a sensor of type SDS011), a path to
-    an sqlite database file and sample time.  The collect method collects data
-    for `sample_time` amount of time, and then asks the FriskbyDao to persist
-    this data.
+    """This class is initialized with a reader (a sensor of type SDS011), a dao and
+    sample time.  The collect method collects data for `sample_time` amount of
+    time, and then asks the FriskbyDao to persist this data.
 
     """
 
-    def __init__(self, reader, sql_path, sample_time, sleep_time=0.10, accuracy=None):
+    def __init__(self, reader, dao, sample_time, sleep_time=0.10, accuracy=None):
         """
-        The sqlite db has a table called 'samples' with schema
-        id, value, sensor, timestamp, uploaded
+        Takes a reader (sensor) and a dao, and collects data and persists to dao.
         """
         self.reader = reader
         self.sample_time = sample_time
         self.sleep_time = sleep_time
         self.accuracy = accuracy
-        self.dao = FriskbyDao(sql_path)
+        self.dao = dao
 
     def collect(self):
-        """Reads values from the sensor and writes it to its sql database.
+        """Reads values from the sensor and writes to dao.
         """
         # reader/sds011 returns (PM10, PM25)
         data = (TS(accuracy=self.accuracy), TS(accuracy=self.accuracy))
