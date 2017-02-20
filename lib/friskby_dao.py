@@ -72,6 +72,20 @@ class FriskbyDao(object):
             stderr.write('Error on setting UPLOADED data! %s.\n' % err)
 
 
+    def __repr__(self):
+        try:
+            q0 = 'SELECT COUNT(id) FROM samples;'
+            q1 = 'SELECT COUNT(id) FROM samples WHERE NOT `uploaded`;'
+            conn = sqlite3.connect(self._sql_path)
+            cur = conn.execute(q0)
+            num = cur.fetchall()[0][0]
+            cur = conn.execute(q1)
+            num_up = cur.fetchall()[0][0]
+            conn.close()
+            fmt = 'FriskbyDao(num_rows = %s, non_uploaded = %s, path = %s)'
+            return fmt % (num, num_up, self._sql_path)
+        except:
+            return 'FriskbyDao(path = %s)' % (self._sql_path)
 
 if __name__ == '__main__':
     if len(argv) > 1:
