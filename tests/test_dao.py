@@ -47,8 +47,10 @@ class DaoTest(TestCase):
             t10 = gen_rand_ts()
             t25 = gen_rand_ts()
             self.dao.persist_ts((t10,t25))
+        print(repr(self.dao))
         data = self.dao.get_non_uploaded(limit=30)
         self.assertEqual(30, len(data))
         self.dao.mark_uploaded(data)
         data = self.dao.get_non_uploaded(limit=30)
         self.assertEqual(4, len(data)) # total 34, marked 30
+        print(repr(self.dao))
