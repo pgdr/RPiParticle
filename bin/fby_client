@@ -129,10 +129,15 @@ class FbyRunner(object):
 
         while True:
             if self._exception_count >= 5:
+                print('Warning: exceptions galore')
+                sys.stderr.write('EXCEPTIONS ALL OVER THE PLACE!\n')
                 time.sleep(30)
             try:
+                print('Collecting ...')
                 sampler.collect()
+                print('Submitting ...')
                 self._submitter.post()
+                print('Updating ...')
                 self.updateClient(self._config)
             except Exception as err:
                 self._handle_post_exception(err, sys.exc_info())

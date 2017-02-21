@@ -43,6 +43,7 @@ class FriskbyDao(object):
             result = conn.execute(query % limit)
             data = result.fetchall()
             conn.close()
+            print('dao fetched %d rows of non-uploaded data' % len(data))
             return data
         except Exception as err:
             stderr.write('Error on reading data: %s.\n' % err)
@@ -59,8 +60,10 @@ class FriskbyDao(object):
             conn.close()
         except Exception as err:
             stderr.write('Error on persisting data: %s.\n' % err)
+        print('Persisted data.')
 
     def mark_uploaded(self, data):
+        print('dao marking ...')
         query = 'UPDATE samples SET uploaded=1 WHERE id=%s'
         try:
             conn = sqlite3.connect(self._sql_path)

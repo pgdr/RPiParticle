@@ -27,6 +27,7 @@ class Sampler(object):
         """
         # reader/sds011 returns (PM10, PM25)
         data = (TS(accuracy=self.accuracy), TS(accuracy=self.accuracy))
+        print('\tShh, I am collecting.')
         start = dt.now()
         while True:
             pm10, pm25 = self.reader.read()
@@ -36,7 +37,9 @@ class Sampler(object):
             dt_now = dt.now() - start
             if dt_now.total_seconds() >= self.sample_time:
                 break
+            print('Zzzz')
             time.sleep(self.sleep_time)
+        print('\tDone collecting, storing and returning.')
         self.dao.persist_ts(data)
 
 

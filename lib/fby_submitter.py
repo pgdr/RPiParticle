@@ -17,6 +17,7 @@ class FriskbySubmitter(object):
         return self.dao
 
     def _upload(self, rows):
+        print('Attempting to upload.')
         # id, value, sensor, timestamp, uploaded
         data = {}
         for row in rows:
@@ -25,6 +26,7 @@ class FriskbySubmitter(object):
                 data[sensor] = []
             data[sensor].append((id_, value, sensor, timestamp))
 
+        print('Connecting.')
         for sensor in data:
             push = {"sensorid"   : sensor,
                     "value_list" : data[sensor],
@@ -33,18 +35,17 @@ class FriskbySubmitter(object):
                                     headers={'Content-Type': 'application/json'},
                                     data=json.dumps(push),
                                     timeout=30)
-        respons.connection.close()
-        if respons.status_code != 201:
-            respons.raise_for_status()
-            raise Exception('Server did not respond with 201 Created.  Response: %d %s'
-                            % (respons.status_code, respons.text))
+            print('posted %s' % sensor)
+            if respons.status_code != 201:
+                respons.raise_for_status()
+                raise Exception('Server did not respond with 201 Created.  Response: %d %s'
+                                % (respons.status_code, respons.text))
+            respons.connection.close()
         return True # no exception, everything written
 
     def post(self):
         if self.device_config is None:
             raise ValueError('Device config not set!')
         to_upload = self.dao.get_non_uploaded()
-        if len(to_upload) <= 4:
-            return
         if self._upload(to_upload):
             self.dao.mark_uploaded(to_upload)
