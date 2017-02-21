@@ -1,3 +1,4 @@
+import sys
 from sys import stderr, argv
 from os.path import abspath, isfile
 from datetime import datetime as dt
@@ -20,6 +21,9 @@ class FriskbyDao(object):
         self._sql_path = abspath(sql_path)
         self.__init_sql()
 
+    def get_path(self):
+        return self._sql_path
+
     def __init_sql(self):
         if not isfile(self._sql_path):
             _id = '`id` INTEGER PRIMARY KEY'
@@ -40,6 +44,8 @@ class FriskbyDao(object):
             result = conn.execute(query % limit)
             data = result.fetchall()
             conn.close()
+            print('dao fetched %d rows of non-uploaded data' % len(data))
+            sys.stdout.flush()
             return data
         except Exception as err:
             stderr.write('Error on reading data: %s.\n' % err)
@@ -56,8 +62,12 @@ class FriskbyDao(object):
             conn.close()
         except Exception as err:
             stderr.write('Error on persisting data: %s.\n' % err)
+        print('Persisted data.')
+        sys.stdout.flush()
 
     def mark_uploaded(self, data):
+        print('dao marking ...')
+        sys.stdout.flush()
         query = 'UPDATE samples SET uploaded=1 WHERE id=%s'
         try:
             conn = sqlite3.connect(self._sql_path)

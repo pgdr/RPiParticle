@@ -43,17 +43,23 @@ def get_sys_info():
 
 class FbyRunner(object):
 
-    def __init__(self, var_path = None):
-        self._sample_time = 10 * 60
-        self._sleep_time = 0.50
+    def __init__(self, var_path=None):
+        self._sample_time = 1 * 60
+        self._sleep_time = 5.0
         self._exception_count = 0 #  #exceptions since last success
         self._accuracy = 4 # round observation to fourth digit
         self._config = None
-        if var_path:
-            VAR_PATH = var_path
-        self._sql_path = os.path.join(VAR_PATH, 'friskby.sql')
+        if not var_path:
+            var_path = '/usr/local/friskby/var'
+        self._sql_path = os.path.join(var_path, 'friskby.sql')
         self._dao = FriskbyDao(self._sql_path)
+        self._submitter = FriskbySubmitter(self._dao)
 
+    def get_dao(self):
+        return self._dao
+
+    def get_submitter(self):
+        return self._submitter
 
     @staticmethod
     def install(config):
@@ -116,17 +122,25 @@ class FbyRunner(object):
         self._config.logMessage("Starting up", long_msg=long_msg)
         self._config.postGitVersion()
 
-        submitter = FriskbySubmitter(self._config, self._dao)
+        self._submitter.set_config(self._config)
         sampler = Sampler(SDS011(True), self._dao,
                           self._sample_time, sleep_time=self._sleep_time,
                           accuracy=self._accuracy)
 
         while True:
             if self._exception_count >= 5:
+                print('Warning: exceptions galore')
+                sys.stdout.flush()
+                sys.stderr.write('EXCEPTIONS ALL OVER THE PLACE!\n')
                 time.sleep(30)
             try:
+                print('Collecting ...')
+                sys.stdout.flush()
                 sampler.collect()
-                submitter.post()
+
+                self._submitter.post()
+                print('Updating ...')
+                sys.stdout.flush()
                 self.updateClient(self._config)
             except Exception as err:
                 self._handle_post_exception(err, sys.exc_info())
