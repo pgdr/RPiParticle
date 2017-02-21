@@ -53,7 +53,13 @@ class FbyRunner(object):
             VAR_PATH = var_path
         self._sql_path = os.path.join(VAR_PATH, 'friskby.sql')
         self._dao = FriskbyDao(self._sql_path)
+        self._submitter = FriskbySubmitter(self._dao)
 
+    def get_dao(self):
+        return self._dao
+
+    def get_submitter(self):
+        return self._submitter
 
     @staticmethod
     def install(config):
@@ -116,7 +122,7 @@ class FbyRunner(object):
         self._config.logMessage("Starting up", long_msg=long_msg)
         self._config.postGitVersion()
 
-        submitter = FriskbySubmitter(self._config, self._dao)
+        self._submitter.set_config(self._config)
         sampler = Sampler(SDS011(True), self._dao,
                           self._sample_time, sleep_time=self._sleep_time,
                           accuracy=self._accuracy)
@@ -126,7 +132,7 @@ class FbyRunner(object):
                 time.sleep(30)
             try:
                 sampler.collect()
-                submitter.post()
+                self._submitter.post()
                 self.updateClient(self._config)
             except Exception as err:
                 self._handle_post_exception(err, sys.exc_info())

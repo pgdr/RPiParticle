@@ -20,6 +20,9 @@ class FriskbyDao(object):
         self._sql_path = abspath(sql_path)
         self.__init_sql()
 
+    def get_path(self):
+        return self._sql_path
+
     def __init_sql(self):
         if not isfile(self._sql_path):
             _id = '`id` INTEGER PRIMARY KEY'

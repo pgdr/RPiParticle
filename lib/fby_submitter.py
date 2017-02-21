@@ -3,13 +3,18 @@ import requests
 
 class FriskbySubmitter(object):
     """This class submits data from a database to the friskby cloud, then proceeds
-    to mark the uploaded data as such.  The constructor takes a device_config
-    (to read https keys and urls) and a path to an sqlite file.
+    to mark the uploaded data as such.
+
     """
 
-    def __init__(self, device_config, dao):
-        self.device_config = device_config
+    def __init__(self, dao):
         self.dao = dao
+
+    def set_config(self, device_config):
+        self.device_config = device_config
+
+    def get_dao(self):
+        return self.dao
 
     def _upload(self, rows):
         # id, value, sensor, timestamp, uploaded
@@ -36,6 +41,8 @@ class FriskbySubmitter(object):
         return True # no exception, everything written
 
     def post(self):
+        if self.device_config is None:
+            raise ValueError('Device config not set!')
         to_upload = self.dao.get_non_uploaded()
         if len(to_upload) <= 4:
             return
