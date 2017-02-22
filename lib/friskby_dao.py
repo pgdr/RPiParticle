@@ -11,9 +11,6 @@ def _insert(val, sensor):
 
 class FriskbyDao(object):
 
-    # CREATE TABLE samples (`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-
-
     def __init__(self, sql_path):
         """The sqlite db has a table called 'samples' with schema
         id, value, sensor, timestamp, uploaded
@@ -36,6 +33,25 @@ class FriskbyDao(object):
             conn = sqlite3.connect(self._sql_path)
             conn.execute(schema)
             conn.close()
+
+    def get_num_rows(self, uploaded_status=None):
+        """Gets num rows in sql storage.  If uploaded_status is set to True, we
+        fetch number of rows that are marked uploaded, if uploaded_status is set
+        to False, we fetch number of rows that are marked as not uploaded.
+        """
+        query = 'SELECT COUNT(uploaded) FROM samples'
+        if uploaded_status is not None:
+            if uploaded_status:
+                query += ' WHERE uploaded'
+            else:
+                query += ' WHERE NOT uploaded'
+        query += ';'
+        conn = sqlite3.connect(self._sql_path)
+        result = conn.execute(query)
+        num = result.fetchone()[0]
+        conn.close()
+        return num
+
 
     def get_non_uploaded(self, limit=100):
         query = 'SELECT * FROM samples WHERE NOT `uploaded` LIMIT %d;'
@@ -84,14 +100,7 @@ class FriskbyDao(object):
 
     def __repr__(self):
         try:
-            q0 = 'SELECT COUNT(id) FROM samples;'
-            q1 = 'SELECT COUNT(id) FROM samples WHERE NOT `uploaded`;'
-            conn = sqlite3.connect(self._sql_path)
-            cur = conn.execute(q0)
-            num = cur.fetchall()[0][0]
-            cur = conn.execute(q1)
-            num_up = cur.fetchall()[0][0]
-            conn.close()
+            num, num_up = self.get_num_rows(), self.get_num_rows(uploaded_status=True)
             fmt = 'FriskbyDao(num_rows = %s, non_uploaded = %s, path = %s)'
             return fmt % (num, num_up, self._sql_path)
         except:
