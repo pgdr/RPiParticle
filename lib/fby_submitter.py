@@ -55,9 +55,6 @@ class FriskbySubmitter(object):
         if self.device_config is None:
             raise ValueError('Device config not set!')
         to_upload = self.dao.get_non_uploaded()
-        if len(to_upload) < 10:
-            return
-
         print('Submitting ...')
         sys.stdout.flush()
         if self._upload(to_upload):
