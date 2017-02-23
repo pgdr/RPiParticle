@@ -2,6 +2,7 @@ from tempfile import NamedTemporaryFile as temp
 from unittest import TestCase
 from random import random as rnd
 import sqlite3
+from datetime import datetime as dt
 from ts import TS
 from friskby_dao import FriskbyDao
 
@@ -69,3 +70,13 @@ class DaoTest(TestCase):
 
         # test num / num upl / num non-upl
         self._do_test_num_upl(self.dao, 2*num_data, 30, 2*num_data - 30)
+
+    def test_localtime(self):
+        t10 = gen_rand_ts()
+        t25 = gen_rand_ts()
+        now = dt.now()
+        self.dao.persist_ts((t10, t25))
+        out = self.dao.get_non_uploaded(limit=1)[0]
+        delta = now - out[3]
+        # checking that we're in the same timezone
+        self.assertTrue(abs(delta.total_seconds()) < 1000)
