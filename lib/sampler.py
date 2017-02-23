@@ -38,8 +38,6 @@ class Sampler(object):
             dt_now = dt.now() - start
             if dt_now.total_seconds() >= self.sample_time:
                 break
-            print('Zzzz')
-            sys.stdout.flush()
             time.sleep(self.sleep_time)
         print('\tDone collecting, storing and returning.')
         sys.stdout.flush()
