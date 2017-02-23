@@ -1,8 +1,9 @@
 import sys
 from sys import stderr, argv
 from os.path import abspath, isfile
-from datetime import datetime as dt
 import sqlite3
+from datetime import datetime as dt
+from dateutil import parser as dt_parser
 
 def _insert(val, sensor):
     """Returns INSERT query"""
@@ -54,14 +55,18 @@ class FriskbyDao(object):
 
 
     def get_non_uploaded(self, limit=100):
-        query = 'SELECT * FROM samples WHERE NOT `uploaded` LIMIT %d;'
+        sub_q = "id, value, sensor, datetime(timestamp, 'localtime'), uploaded"
+        query = 'SELECT %s FROM samples WHERE NOT `uploaded` LIMIT %d;'
         try:
             conn = sqlite3.connect(self._sql_path)
-            result = conn.execute(query % limit)
+            result = conn.execute(query % (sub_q, limit))
             data = result.fetchall()
             conn.close()
             print('dao fetched %d rows of non-uploaded data' % len(data))
             sys.stdout.flush()
+            for i in range(len(data)):
+                id_, val_, sens_, dt_, upl_ = data[i]
+                data[i] = id_, val_, sens_, dt_parser.parse(dt_), upl_
             return data
         except Exception as err:
             stderr.write('Error on reading data: %s.\n' % err)

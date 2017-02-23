@@ -41,8 +41,8 @@ def get_sys_info():
 class FbyRunner(object):
 
     def __init__(self, var_path=None):
-        self._sample_time = 1 * 60
-        self._sleep_time = 5.0
+        self._sample_time = 10 * 60
+        self._sleep_time = 0.5
         self._exception_count = 0 #  #exceptions since last success
         self._accuracy = 4 # round observation to fourth digit
         self._config = None
