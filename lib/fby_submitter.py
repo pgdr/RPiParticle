@@ -33,7 +33,7 @@ class FriskbySubmitter(object):
         for sensor in data:
             sensor_id = self.device_config.getSensorId(sensor)
             push = {"sensorid"   : sensor_id,
-                    "value_list" : [(x[3], x[1]) for x in data[sensor]], # (time, val)
+                    "value_list" : [(x[3].isoformat(), x[1]) for x in data[sensor]], # (time, val)
                     "key"        : self.device_config.getPostKey()}
             print('Posting to %s' % self.device_config.getPostURL())
             print(push)
