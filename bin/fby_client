@@ -8,25 +8,9 @@ import requests
 from traceback import format_exception
 import json
 
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
-sys.path.insert(0, os.path.join(ROOT, "lib"))
-CONFIG_FILE = os.path.join(ROOT, "etc/config.json")
-VAR_PATH = os.path.join(ROOT, "var")
-
-import dist
 from fby_submitter import FriskbySubmitter
-from friskby_dao import FriskbyDao
 from sampler import Sampler
-from device_config import DeviceConfig
-from git_module import GitModule
-from os_release import sys_info
-if os.getenv("FRISKBY_TEST"):
-    try:
-        from sds011 import SDS011
-    except SerialException:
-        from mock_sds011 import SDS011
-else:
-    from sds011 import SDS011
+from friskby import FriskbyDao, dist, DeviceConfig, GitModule, sys_info, SDS011
 
 def get_sys_info():
     info = ''
@@ -40,14 +24,19 @@ def get_sys_info():
 
 class FbyRunner(object):
 
-    def __init__(self, var_path=None):
+    def __init__(self, root=None, config_file=None, var_path=None):
+        if not root:
+            self.root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+        if not config_file:
+            self.config_file = os.path.join(self.root, "etc/config.json")
+        if not var_path:
+            var_path = os.path.join(self.root, "var")
+
         self._sample_time = 10 * 60
         self._sleep_time = 0.5
         self._exception_count = 0 #  #exceptions since last success
         self._accuracy = 4 # round observation to fourth digit
         self._config = None
-        if not var_path:
-            var_path = '/usr/local/friskby/var'
         self._sql_path = os.path.join(var_path, 'friskby.sql')
         self._dao = FriskbyDao(self._sql_path)
         self._submitter = FriskbySubmitter(self._dao)
@@ -58,39 +47,37 @@ class FbyRunner(object):
     def get_submitter(self):
         return self._submitter
 
-    @staticmethod
-    def install(config):
+    def install(self, config):
         git_module = GitModule(url=config.getRepoURL())
         git_module.checkout(config.getGitRef())
         git_module.runTests("tests/run_tests")
-        git_module.install(ROOT, files=dist.files, directories=dist.directories)
-        config.save(filename=CONFIG_FILE)
+        git_module.install(self.root,
+                           files=friskby.files,
+                           directories=friskby.directories)
+        config.save(filename=self.config_file)
 
 
-    @classmethod
-    def rollback(cls, config):
-        cls.install(config)
+    def rollback(self, config):
+        self.install(config)
 
 
-    @classmethod
-    def restart(cls, config):
-        cls.install(config)
+    def restart(self, config):
+        self.install(config)
         os.execl(__file__, __file__)
 
         raise Exception("Fatal error: os.execl() returned - trying to rollback")
 
-    @classmethod
-    def updateClient(cls, config):
+    def updateClient(self, config):
         new_config = config.downloadNew()
         if config.updateRequired(new_config):
             try:
                 config.logMessage("Restarting client - new version:%s" % new_config.getGitRef())
-                cls.restart(new_config)
+                self.restart(new_config)
             except:
                 exc_type, exc_value, exc_tb = sys.exc_info()
                 tb_list = format_exception(exc_type, exc_value, exc_tb)
                 config.logMessage("Restart failed - trying rollback", long_msg="".join(tb_list))
-                cls.rollback(config)
+                self.rollback(config)
                 config.logMessage("Rollback complete")
 
 
@@ -113,8 +100,7 @@ class FbyRunner(object):
             sys.stderr.write('Error submitting log message!')
 
     def run(self):
-
-        self._config = DeviceConfig(CONFIG_FILE)
+        self._config = DeviceConfig(self.config_file)
         long_msg = get_sys_info()
         self._config.logMessage("Starting up", long_msg=long_msg)
         self._config.postGitVersion()
@@ -146,5 +132,9 @@ class FbyRunner(object):
 
 
 if __name__ == "__main__":
-    fby = FbyRunner()
+    ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+    CONFIG_FILE = os.path.join(ROOT, "etc/config.json")
+    VAR_PATH = os.path.join(ROOT, "var")
+
+    fby = FbyRunner(root=ROOT, config_file=CONFIG_FILE, var_path=VAR_PATH)
     fby.run()
