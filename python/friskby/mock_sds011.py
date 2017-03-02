@@ -5,3 +5,7 @@ class SDS011(object):
 
     def read(self):
         return (10, 25)
+
+    @classmethod
+    def is_mock(cls):
+        return True

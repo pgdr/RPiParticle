@@ -55,3 +55,7 @@ class SDS011(object):
         pm10 = float(pm10hb + pm10lb*256)/10.0
 
         return (pm10, pm25)
+
+    @classmethod
+    def is_mock(cls):
+        return False
