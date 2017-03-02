@@ -38,7 +38,6 @@ class FbyRunner(object):
 
         self._sample_time = 10 * 60
         self._sleep_time = 0.5
-        self._exception_count = 0 #  #exceptions since last success
         self._accuracy = 4 # round observation to fourth digit
         self._config = None
         self._sql_path = os.path.join(var_path, 'friskby.sql')
@@ -86,9 +85,6 @@ class FbyRunner(object):
 
 
     def _handle_post_exception(self, err, exc_info):
-        self._exception_count += 1
-        if self._exception_count > 5:
-            return
         err_msg = '(unknown error for %s)' % str(type(err))
         try:
             err_msg = str(err)
@@ -117,10 +113,6 @@ class FbyRunner(object):
                                          accuracy=self._accuracy)
 
         while True:
-            if self._exception_count >= 5:
-                print('Warning: exception count exceeded')
-                sys.stdout.flush()
-                sys.exit('Exception count exceeded.  Giving up.')
             try:
                 print('Collecting ...')
                 sys.stdout.flush()
@@ -132,9 +124,7 @@ class FbyRunner(object):
                 self.update_client(self._config)
             except Exception as err:
                 self._handle_post_exception(err, sys.exc_info())
-            else:
-                # try/except/else: if nothing has been raised we successfully posted
-                self._exception_count = 0
+                raise
 
 
 if __name__ == "__main__":
