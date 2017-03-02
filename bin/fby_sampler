@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import sys
 import time
@@ -47,9 +48,9 @@ class FbySampler(object):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        dao = FriskbyDao(sys.argv[1])
+        DAO = FriskbyDao(sys.argv[1])
         from friskby import SDS011
-        sam = FbySampler(SDS011(True), dao, 10) # 10 sec
-        sam.collect()
+        SAM = FbySampler(SDS011(True), DAO, 10) # 10 sec
+        SAM.collect()
     else:
         sys.stderr.write('Please specify database file.\n')

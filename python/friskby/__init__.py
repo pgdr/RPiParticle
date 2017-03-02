@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 """The friskby module
 """
 from serial import SerialException
@@ -10,11 +11,17 @@ from .os_release import sys_info
 # if _os_getenv("FRISKBY_TEST"):
 try:
     from sds011 import SDS011
+except ImportError as err:
+    import sys
+    sys.stderr.write('Missing SDS011 library!"%s"!\nUsing mock library.\n' % str(err))
+    sys.stderr.flush()
+    from .mock_sds011 import SDS011
 except SerialException as err:
     import sys
     sys.stderr.write('Using mock SDS011 serial device: "%s"!\n' % str(err))
     sys.stderr.flush()
-    from mock_sds011 import SDS011
+    from .mock_sds011 import SDS011
+
     
 from .service_config import ServiceConfig
 from .ts import TS
