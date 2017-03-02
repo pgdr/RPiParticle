@@ -33,7 +33,7 @@ class ServiceConfig(object):
         os.chmod(self.config_file, mode)
 
 
-    def enable(self, start = True):
+    def enable(self, start=True):
         subprocess.check_call(["systemctl", "daemon-reload"])
         subprocess.check_call(["systemctl", "enable", self.name])
         if start:

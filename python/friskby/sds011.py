@@ -10,8 +10,8 @@ class SDS011(object):
 
     sleep_time = 0.01
 
-    device_usb = serial.Serial('/dev/ttyUSB0', baudrate=9600, stopbits=1, parity="N",  timeout=2)
-    device_ama = serial.Serial('/dev/ttyAMA0', baudrate=9600, stopbits=1, parity="N",  timeout=2)
+    device_usb = serial.Serial('/dev/ttyUSB0', baudrate=9600, stopbits=1, parity="N", timeout=2)
+    device_ama = serial.Serial('/dev/ttyAMA0', baudrate=9600, stopbits=1, parity="N", timeout=2)
 
     def __init__(self, usb):
         if usb:

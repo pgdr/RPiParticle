@@ -1,3 +1,5 @@
+from __future__ import division
+
 class TS(object):
     """A class for representing time series.
 
@@ -19,7 +21,7 @@ class TS(object):
         return self._round(self.data[idx])
 
     def append(self, d):
-        self.data.append( d )
+        self.data.append(d)
 
     def __repr__(self):
         return str(self)

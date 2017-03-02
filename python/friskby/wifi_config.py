@@ -1,6 +1,5 @@
 from __future__ import print_function
 import sys
-import os.path
 import re
 import subprocess
 from collections import OrderedDict
@@ -33,7 +32,7 @@ class Network(object):
 class WifiConfig(object):
     network_settings = set(["ssid", "psk", "key_mgmt"])
 
-    def __init__(self, config_file = "/etc/wpa_supplicant/wpa_supplicant.conf"):
+    def __init__(self, config_file="/etc/wpa_supplicant/wpa_supplicant.conf"):
         self.__networks = {}
         self.__settings = OrderedDict()
         self.config_file = config_file
@@ -42,7 +41,7 @@ class WifiConfig(object):
             for (key, value) in setting.findall(content):
                 if not key in WifiConfig.network_settings:
                     self.__settings[key] = value
-                    
+
 
             for net_config in network.findall(content):
                 d = {}
@@ -58,12 +57,12 @@ class WifiConfig(object):
             network.psk = psk
         else:
             self.__networks[ssid] = Network({"ssid" : ssid, "psk" : psk})
-            
+
 
     def networks(self):
         return self.__networks
 
-            
+
     def settings(self):
         return self.__settings
 
@@ -74,11 +73,11 @@ class WifiConfig(object):
 
         with open(config_file, "w") as f:
             for key, value in self.__settings.items():
-                f.write("%s=%s\n" % (key,value))
+                f.write("%s=%s\n" % (key, value))
 
             for network in self.__networks.values():
                 network.save(f)
-                
+
     @classmethod
     def ifup(cls):
         print("Trying: /sbin/ifup wlan0 ...", end="")
